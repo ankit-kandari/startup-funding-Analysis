@@ -37,6 +37,39 @@ def overall_detail():
     st.pyplot(fig3)
 
 
+def startup_detail(startup):
+    dff=df[df["startup"]==startup]
+    vertical = dff["vertical"].iloc[0]
+    sub_verticals = dff["subv"].value_counts()
+    sum = dff["amount"].sum()
+    df["date"]=pd.to_datetime(df["date"])
+    df["year"]=df["date"].dt.year
+    total=df.groupby("year")["amount"].sum().reset_index().round()
+    col1,col2 = st.columns(2)
+    with col1:
+        #st.subheader("vertical")
+        st.metric("vertical",vertical)
+    with col2:
+        st.subheader("sub verticles")
+        st.dataframe(sub_verticals)
+    col3,col4 = st.columns(2)
+    with col3:
+        #st.subheader("fund recieved")
+        st.metric("total fund recieved", str(sum) + " cr")
+    col5,col6 = st.columns(2)
+    with col5:
+        st.subheader("year wise funding recieved in crore")
+        st.dataframe(total)
+    with col6:
+        st.subheader("graphic representation")
+        fig4, ax4 = plt.subplots()
+        ax4.bar(df["year"], df["amount"])
+        st.pyplot(fig4)
+
+
+
+
+
 
 
 
@@ -90,9 +123,11 @@ if option == "overall analysis":
     #if btn0:
     overall_detail()
 elif option == "startup":
-    st.sidebar.selectbox("select",sorted(df["startup"].unique().tolist()))
+    start = st.sidebar.selectbox("select",sorted(df["startup"].unique().tolist()))
     btn1 = st.sidebar.button("find startup details")
     st.title("startup analysis")
+    if btn1:
+        startup_detail(start)
 else:
     investor = st.sidebar.selectbox("select",set(df["investors"].str.split(",").explode()))
     btn2 = st.sidebar.button("find investors details")
